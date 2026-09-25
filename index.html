@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visiting Hours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+
+    --paper: #EFEAE0;
+    --paper-raised: #F7F4EC;
+    --ink: #2A2622;
+    --ink-soft: #6B6459;
+    --rule: #D8D0BF;
+    --claret: #7A2E2E;
+    --claret-soft: #F0E1DC;
+    --open: #3F5D45;
+    --open-soft: #E4EBE1;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #211E1A;
+      --paper-raised: #2B2722;
+      --ink: #EFE9DE;
+      --ink-soft: #A79E8F;
+      --rule: #454036;
+      --claret: #D98F8F;
+      --claret-soft: #3A2626;
+      --open: #9CC2A2;
+      --open-soft: #253027;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #211E1A;
+    --paper-raised: #2B2722;
+    --ink: #EFE9DE;
+    --ink-soft: #A79E8F;
+    --rule: #454036;
+    --claret: #D98F8F;
+    --claret-soft: #3A2626;
+    --open: #9CC2A2;
+    --open-soft: #253027;
+  }
+
+  .page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  header.masthead {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 20px;
+    margin-bottom: 8px;
+  }
+  .kicker {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+  }
+  h1 {
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 6px 0 4px;
+  }
+  .visitor-line {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .date-line {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+
+  .notice {
+    margin: 18px 0 28px;
+    padding: 14px 16px;
+    border: 1px solid var(--rule);
+    background: var(--paper-raised);
+    border-radius: 3px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .notice strong { color: var(--ink); }
+
+  .you-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .you-field input {
+    flex: 1;
+    max-width: 260px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 8px 10px;
+  }
+  .you-field input:focus-visible { outline: 2px solid var(--claret); outline-offset: 2px; }
+
+  ul.slots {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+  li.slot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  li.slot.group-slot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  li.slot.group-slot .slot-status {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  .slot-time {
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    min-width: 148px;
+    flex-shrink: 0;
+  }
+  .slot-status {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .badge {
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 3px;
+  }
+  .badge.open { background: var(--open-soft); color: var(--open); }
+  .badge.taken { background: var(--claret-soft); color: var(--claret); }
+  .badge.blocked { background: var(--rule); color: var(--ink-soft); }
+  .badge.group { background: var(--open-soft); color: var(--open); }
+
+  .group-names { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 13px;
+  }
+
+  button.primary {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 3px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  button.primary:hover { opacity: 0.85; }
+  button.ghost {
+    font-family: inherit;
+    font-size: 13px;
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    border-radius: 3px;
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+  button.ghost:hover { border-color: var(--claret); color: var(--claret); }
+
+  .taken-name, .blocked-label { font-size: 15px; color: var(--ink-soft); }
+
+  .empty-note {
+    padding: 40px 0;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+
+  .status-line {
+    min-height: 20px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 14px;
+  }
+  .status-line.error { color: var(--claret); }
+
+  .download-row { margin-top: 10px; }
+
+  footer {
+    margin-top: 36px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 480px) {
+    li.slot { flex-wrap: wrap; }
+    .slot-status { justify-content: flex-start; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <span class="kicker">Visiting hours</span>
+    <h1 id="visitorHeading">Loading…</h1>
+    <p class="visitor-line" id="visitorSub"></p>
+    <p class="date-line" id="dateLine"></p>
+  </header>
+
+  <div class="notice">
+    This page updates when the organizer refreshes it — it isn't live. To reserve or join a slot, click its button: it opens an email pre-filled with your request. The organizer will confirm and update the schedule.
+  </div>
+
+  <div class="you-field">
+    <span>Your name</span>
+    <input type="text" id="inpYourName" placeholder="Used to fill in your email request">
+  </div>
+
+  <ul class="slots" id="slotsList"></ul>
+  <div class="empty-note" id="emptyNote" style="display:none;">No time slots are set up yet.</div>
+
+  <div class="status-line" id="statusLine"></div>
+
+  <div class="download-row">
+    <button class="ghost" id="btnDownload" type="button">Download current schedule (CSV)</button>
+  </div>
+
+  <footer>One person per slot unless marked as a group sign-up. Requests go to the organizer by email and aren't confirmed until they update this page.</footer>
+</div>
+
+<script>
+(function () {
+  // Baked-in schedule snapshot — the organizer updates and republishes this page;
+  // it is not live and does not save anything back anywhere.
+  var STATE = {"settings":{"visitorName":"Rick van der Ploeg","date":"2026-09-29","startTime":"11:30","endTime":"18:00","slotMinutes":30},"bookings":{"11:30":"Klaus Ritzberger"},"overrides":{"12:30":{"type":"group","label":"Lunch","names":[],"spanSlots":3},"14:00":{"type":"blocked","label":"Seminar"},"14:30":{"type":"blocked","label":"Seminar"},"15:00":{"type":"blocked","label":"Seminar"}}};
+
+  var ORGANIZER_EMAIL = "klaus.ritzberger@rhul.ac.uk";
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+
+  function generateSlotStarts(settings) {
+    var starts = [];
+    if (!settings.startTime || !settings.endTime) return starts;
+    var [sh, sm] = settings.startTime.split(":").map(Number);
+    var [eh, em] = settings.endTime.split(":").map(Number);
+    var startMin = sh * 60 + sm;
+    var endMin = eh * 60 + em;
+    var step = settings.slotMinutes || 30;
+    for (var t = startMin; t + step <= endMin; t += step) {
+      starts.push(pad(Math.floor(t / 60)) + ":" + pad(t % 60));
+    }
+    return starts;
+  }
+
+  function addMinutes(hhmm, mins) {
+    var [h, m] = hhmm.split(":").map(Number);
+    var total = h * 60 + m + mins;
+    return pad(Math.floor(total / 60) % 24) + ":" + pad(total % 60);
+  }
+
+  function buildRows(state) {
+    var starts = generateSlotStarts(state.settings);
+    var slotLen = state.settings.slotMinutes || 30;
+    var rows = [];
+    var i = 0;
+    while (i < starts.length) {
+      var start = starts[i];
+      var override = state.overrides[start];
+      var span = (override && override.spanSlots > 1) ? override.spanSlots : 1;
+      var end = addMinutes(start, slotLen * span);
+      rows.push({
+        anchor: start,
+        start: start,
+        end: end,
+        override: override || null,
+        booking: state.bookings[start] || null
+      });
+      i += span;
+    }
+    return rows;
+  }
+
+  function fmt12(hhmm) {
+    var [h, m] = hhmm.split(":").map(Number);
+    var period = h >= 12 ? "PM" : "AM";
+    var h12 = h % 12; if (h12 === 0) h12 = 12;
+    return h12 + (m ? ":" + pad(m) : ":00") + " " + period;
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return "";
+    var d = new Date(iso + "T00:00:00");
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  }
+
+  function setStatus(msg, isError) {
+    var el = document.getElementById("statusLine");
+    el.textContent = msg;
+    el.className = "status-line" + (isError ? " error" : "");
+  }
+
+  function requestSlot(timeLabel, slotDesc) {
+    var nameInput = document.getElementById("inpYourName");
+    var name = (nameInput.value || "").trim();
+    if (!name) {
+      setStatus("Add your name above first.", true);
+      nameInput.focus();
+      return;
+    }
+    try { localStorage.setItem("visiting-hours-your-name", name); } catch (e) {}
+    var s = STATE.settings;
+    var subject = "Visiting hours request: " + timeLabel;
+    var bodyLines = [
+      "Hi,",
+      "",
+      "I'd like to request the " + timeLabel + " slot" + (slotDesc ? " (" + slotDesc + ")" : "") +
+        (s.date ? " on " + fmtDate(s.date) : "") + (s.visitorName ? " with " + s.visitorName : "") + ".",
+      "",
+      "Name: " + name
+    ];
+    var mailto = "mailto:" + encodeURIComponent(ORGANIZER_EMAIL) +
+      "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(bodyLines.join("\n"));
+    window.location.href = mailto;
+    setStatus("Opening an email to the organizer…", false);
+  }
+
+  function render() {
+    var s = STATE.settings;
+    document.getElementById("visitorHeading").textContent = s.visitorName
+      ? "Time with " + s.visitorName
+      : "Sign up for a time slot";
+    document.getElementById("visitorSub").textContent = s.visitorName
+      ? "Request a slot below by email."
+      : "";
+    document.getElementById("dateLine").textContent = fmtDate(s.date);
+
+    var rows = buildRows(STATE);
+    var list = document.getElementById("slotsList");
+    var emptyNote = document.getElementById("emptyNote");
+    list.innerHTML = "";
+
+    if (rows.length === 0) {
+      list.style.display = "none";
+      emptyNote.style.display = "block";
+      return;
+    }
+    list.style.display = "block";
+    emptyNote.style.display = "none";
+
+    rows.forEach(function (row) {
+      var start = row.anchor;
+      var end = row.end;
+      var timeLabel = fmt12(start) + " – " + fmt12(end);
+      var booking = row.booking;
+      var override = row.override;
+
+      var li = document.createElement("li");
+      li.className = "slot";
+
+      var timeEl = document.createElement("span");
+      timeEl.className = "slot-time";
+      timeEl.textContent = timeLabel;
+      li.appendChild(timeEl);
+
+      var statusEl = document.createElement("div");
+      statusEl.className = "slot-status";
+
+      if (booking) {
+        var nameSpan = document.createElement("span");
+        nameSpan.className = "taken-name";
+        nameSpan.textContent = booking;
+        statusEl.appendChild(nameSpan);
+      } else if (override && override.type === "blocked") {
+        var blockedBadge = document.createElement("span");
+        blockedBadge.className = "badge blocked";
+        blockedBadge.textContent = override.label || "Unavailable";
+        statusEl.appendChild(blockedBadge);
+      } else if (override && override.type === "group") {
+        li.classList.add("group-slot");
+
+        var groupBadge = document.createElement("span");
+        groupBadge.className = "badge group";
+        groupBadge.textContent = override.label || "Group sign-up";
+        statusEl.appendChild(groupBadge);
+
+        var names = override.names || [];
+        if (names.length) {
+          var namesWrap = document.createElement("span");
+          namesWrap.className = "group-names";
+          names.forEach(function (n) {
+            var chip = document.createElement("span");
+            chip.className = "chip";
+            chip.textContent = n;
+            namesWrap.appendChild(chip);
+          });
+          statusEl.appendChild(namesWrap);
+        }
+
+        var joinBtn = document.createElement("button");
+        joinBtn.className = "primary";
+        joinBtn.type = "button";
+        joinBtn.textContent = "Request to join";
+        joinBtn.addEventListener("click", function () {
+          requestSlot(timeLabel, override.label);
+        });
+        statusEl.appendChild(joinBtn);
+      } else {
+        var openBadge = document.createElement("span");
+        openBadge.className = "badge open";
+        openBadge.textContent = "Open";
+        statusEl.appendChild(openBadge);
+
+        var reqBtn = document.createElement("button");
+        reqBtn.className = "primary";
+        reqBtn.type = "button";
+        reqBtn.textContent = "Request this slot";
+        reqBtn.addEventListener("click", function () {
+          requestSlot(timeLabel, null);
+        });
+        statusEl.appendChild(reqBtn);
+      }
+
+      li.appendChild(statusEl);
+      list.appendChild(li);
+    });
+  }
+
+  function csvField(f) {
+    var str = String(f == null ? "" : f);
+    if (/[",\r\n]/.test(str)) str = '"' + str.replace(/"/g, '""') + '"';
+    return str;
+  }
+
+  function downloadResults() {
+    var s = STATE.settings;
+    var lines = [];
+    lines.push([csvField("Visiting Hours")].join(","));
+    lines.push([csvField("Visitor"), csvField(s.visitorName || "")].join(","));
+    lines.push([csvField("Date"), csvField(fmtDate(s.date))].join(","));
+    lines.push("");
+    lines.push([csvField("Time"), csvField("Status")].join(","));
+    buildRows(STATE).forEach(function (row) {
+      var timeLabel = fmt12(row.start) + " - " + fmt12(row.end);
+      var status;
+      if (row.booking) {
+        status = "Booked: " + row.booking;
+      } else if (row.override && row.override.type === "blocked") {
+        status = "Blocked" + (row.override.label ? " (" + row.override.label + ")" : "");
+      } else if (row.override && row.override.type === "group") {
+        var names = row.override.names || [];
+        status = (row.override.label || "Group sign-up") + ": " + (names.length ? names.join("; ") : "No one yet");
+      } else {
+        status = "Open";
+      }
+      lines.push([csvField(timeLabel), csvField(status)].join(","));
+    });
+    var csv = lines.join("\r\n");
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "visiting-hours-" + (s.date || "schedule") + ".csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  document.getElementById("btnDownload").addEventListener("click", downloadResults);
+
+  try {
+    var savedName = localStorage.getItem("visiting-hours-your-name");
+    if (savedName) document.getElementById("inpYourName").value = savedName;
+  } catch (e) {}
+
+  render();
+})();
+</script>
+</body>
+</html>
